@@ -6,8 +6,9 @@ var wd = require("yiewd")
   , monocle = require("monocle-js")
   , o_O = monocle.o_O
   , _ = require("underscore")
-  , leo = {
-      'appPkg': 'org.leo.android.dict'
+  , appdesc = {
+      'app': path.resolve(__dirname, "org.leo.android.dict-1.apk")
+    , 'appPkg': 'org.leo.android.dict'
     , 'appAct': 'org.leo.android.dict.LeoDict' }
   , defaultCaps = {
       browserName: 'Android'
@@ -34,11 +35,10 @@ var wd = require("yiewd")
 
   var driver = wd.remote("127.0.0.1", 4723);
   driver.run(function*() {
-    var app = path.resolve(__dirname, "org.leo.android.dict-1.apk");
     var caps = _.extend(defaultCaps, {
-      "app": app,
-      "app-package": leo["appPkg"],
-      "app-activity": leo["appAct"]
+      "app": appdesc["app"],
+      "app-package": appdesc["appPkg"],
+      "app-activity": appdesc["appAct"]
     });
 
     yield driver.init(caps);
