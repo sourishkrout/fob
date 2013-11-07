@@ -49,8 +49,6 @@ var wd = require("yiewd")
   });
 
   var addItem = o_O(function*(driver, pairs) {
-    var pairs = yield readPairs();
-
     pairs.sort(function(a, b) {
       var al = a[0].length + a[1].length;
       var bl = b[0].length + b[1].length;
@@ -68,6 +66,14 @@ var wd = require("yiewd")
     yield adds[0].sendKeys(label + '\n');
   });
 
+  var sync = o_O(function*(driver) {
+    var button = yield driver.elementById("com.wunderkinder.wunderlistandroid:id/actionbar_upcaret_icon");
+    yield button.click();
+    var syncbtn = yield driver.elementById("com.wunderkinder.wunderlistandroid:id/FV_SyncButton");
+    yield syncbtn.click();
+    yield driver.sleep(10); // let's give it 10s to sync
+  });
+
   var dismiss = o_O(function*(driver) {
     var next = yield driver.elementByName("Next");
     yield next.click();
@@ -83,11 +89,13 @@ var wd = require("yiewd")
       "app-activity": appdesc["appAct"]
     });
 
+    var pairs = yield readPairs();
     yield driver.init(caps);
     yield login(driver);
     yield driver.sleep(4);
     yield dismiss(driver);
     yield addItem(driver, pairs);
+    yield sync(driver);
     yield driver.quit();
   });
 })();
