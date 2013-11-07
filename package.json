@@ -12,6 +12,7 @@
   "dependencies": {
     "yiewd": "0.0.16",
     "monocle-js": "~0.2.0",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "concat-stream": "~1.1.0"
   }
 }
