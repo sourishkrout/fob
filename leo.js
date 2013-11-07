@@ -1,10 +1,12 @@
 /*global beforeEach:true, afterEach:true, describe:true */
 
 var wd = require("yiewd")
+  , concat = require('concat-stream')
   , path = require("path")
   , _ = require("underscore")
   , monocle = require("monocle-js")
   , o_O = monocle.o_O
+  , o_C = monocle.callback
   , _ = require("underscore")
   , appdesc = {
       'app': path.resolve(__dirname, "org.leo.android.dict-1.apk")
@@ -33,6 +35,22 @@ var wd = require("yiewd")
     return true;
   };
 
+  var readTerm = o_O(function*() {
+    var cb = o_C();
+
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.pipe(concat(cb));
+
+    var raw = yield cb;
+        raw = raw.replace(/[\n]/g, '');
+        raw = raw.replace(/\s{2,}/g, ' ');
+        raw = raw.replace(/[\t]/g, ' ');
+
+    return raw;
+  });
+
   var driver = wd.remote("127.0.0.1", 4723);
   driver.run(function*() {
     var caps = _.extend(defaultCaps, {
@@ -50,7 +68,8 @@ var wd = require("yiewd")
     yield texts[1].click();
 
     var lookup = yield driver.elementsByTagName("EditText");
-    yield lookup[0].sendKeys("muede\n");
+    var term = yield readTerm();
+    yield lookup[0].sendKeys(term + "\n");
 
     // make this a spinner
     yield driver.sleep(4);
@@ -68,6 +87,20 @@ var wd = require("yiewd")
       pairs.push([flat[i], flat[i+1]]);
     }
 
-    console.log(JSON.stringify(pairs));
+    // Weeeeeeeee umlauts!
+    var raw = JSON.stringify(pairs);
+        raw = raw.replace(/[\n]/g, '');
+        raw = raw.replace(/\s{2,}/g, ' ');
+        raw = raw.replace(/[\t]/g, ' ');
+        raw = raw.replace(/[ä]/gi, 'ae');
+        raw = raw.replace(/[ö]/gi, 'oe');
+        raw = raw.replace(/[ü]/gi, 'ue');
+        raw = raw.replace(/[Ä]/gi, 'Ae');
+        raw = raw.replace(/[Ö]/gi, 'Oe');
+        raw = raw.replace(/[Ü]/gi, 'Ue');
+        raw = raw.replace(/[ß]/gi, 'ss');
+    console.log(raw);
+
+    yield driver.quit();
   });
 })();

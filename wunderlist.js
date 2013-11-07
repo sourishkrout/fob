@@ -37,12 +37,14 @@ var wd = require("yiewd")
   });
 
   var addItem = o_O(function*(driver, pairs) {
-    yield driver.sleep(1);
     var label = pairs[0].join(' - ');
-    var add = yield driver.elementByName("Add an item...");
+    var adds = yield driver.elementsByTagName("EditText");
 
-    yield add.doubleclick();
-    yield add.sendKeys("test");
+    console.log(label);
+
+    yield adds[0].click();
+    yield adds[0].click();
+    yield adds[0].sendKeys(label + '\n');
   });
 
   var dismiss = o_O(function*(driver) {
@@ -78,5 +80,6 @@ var wd = require("yiewd")
     yield driver.sleep(4);
     yield dismiss(driver);
     yield addItem(driver, pairs);
+    yield driver.quit();
   });
 })();
