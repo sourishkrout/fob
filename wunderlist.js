@@ -36,7 +36,28 @@ var wd = require("yiewd")
     yield button.click();
   });
 
+  var readPairs = o_O(function*() {
+    var cb = o_C();
+
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.pipe(concat(cb));
+    
+    var data = yield cb;
+    return JSON.parse(data);
+  });
+
   var addItem = o_O(function*(driver, pairs) {
+    var pairs = yield readPairs();
+
+    pairs.sort(function(a, b) {
+      var al = a[0].length + a[1].length;
+      var bl = b[0].length + b[1].length;
+
+      // shorter entries first
+      return al - bl;
+    });
     var label = pairs[0].join(' - ');
     var adds = yield driver.elementsByTagName("EditText");
 
@@ -54,18 +75,6 @@ var wd = require("yiewd")
     yield done.click();
   });
 
-  var readPairs = o_O(function*() {
-    var cb = o_C();
-
-    process.stdin.resume();
-    process.stdin.setEncoding('utf8');
-
-    process.stdin.pipe(concat(cb));
-    
-    var data = yield cb;
-    return JSON.parse(data);
-  });
-
   var driver = wd.remote("127.0.0.1", 4723);
   driver.run(function*() {
     var caps = _.extend(defaultCaps, {
@@ -74,7 +83,6 @@ var wd = require("yiewd")
       "app-activity": appdesc["appAct"]
     });
 
-    var pairs = yield readPairs();
     yield driver.init(caps);
     yield login(driver);
     yield driver.sleep(4);
