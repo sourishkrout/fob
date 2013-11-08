@@ -51,30 +51,10 @@ var wd = require("yiewd")
     return raw;
   });
 
-  var driver = wd.remote("127.0.0.1", 4723);
-  driver.run(function*() {
-    var caps = _.extend(defaultCaps, {
-      "app": appdesc["app"],
-      "app-package": appdesc["appPkg"],
-      "app-activity": appdesc["appAct"]
-    });
-
-    yield driver.init(caps);
-
+  var processEntries = o_O(function*(entries) {
     var flat = [];
     var pairs = [];
-    var texts = yield driver.elementsByTagName("TextView");
-    // trigger lookup
-    yield texts[1].click();
 
-    var lookup = yield driver.elementsByTagName("EditText");
-    var term = yield readTerm();
-    yield lookup[0].sendKeys(term + "\n");
-
-    // make this a spinner
-    yield driver.sleep(4);
-
-    var entries = yield driver.elementsByTagName("TextView");
     for (var e in entries) {
       var val = yield entries[e].text();
 
@@ -92,6 +72,7 @@ var wd = require("yiewd")
         raw = raw.replace(/[\n]/g, '');
         raw = raw.replace(/\s{2,}/g, ' ');
         raw = raw.replace(/[\t]/g, ' ');
+        raw = raw.replace(/[\']/g, '');
         raw = raw.replace(/[ä]/gi, 'ae');
         raw = raw.replace(/[ö]/gi, 'oe');
         raw = raw.replace(/[ü]/gi, 'ue');
@@ -99,7 +80,35 @@ var wd = require("yiewd")
         raw = raw.replace(/[Ö]/gi, 'Oe');
         raw = raw.replace(/[Ü]/gi, 'Ue');
         raw = raw.replace(/[ß]/gi, 'ss');
-    console.log(raw);
+
+    return raw;
+  });
+
+  var driver = wd.remote("127.0.0.1", 4723);
+  driver.run(function*() {
+    var caps = _.extend(defaultCaps, {
+      "app": appdesc["app"],
+      "app-package": appdesc["appPkg"],
+      "app-activity": appdesc["appAct"]
+    });
+
+    yield driver.init(caps);
+
+    var texts = yield driver.elementsByTagName("TextView");
+    // trigger lookup
+    yield texts[1].click();
+
+    var lookup = yield driver.elementsByTagName("EditText");
+    var term = yield readTerm();
+    yield lookup[0].sendKeys(term + "\n");
+
+    // make this a spinner
+    yield driver.sleep(4);
+
+    var entries = yield driver.elementsByTagName("TextView");
+    var raw = yield processEntries(entries);
+
+    process.stdout.write(raw);
 
     yield driver.quit();
   });
