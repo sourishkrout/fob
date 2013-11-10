@@ -8,6 +8,7 @@ var wd = require("yiewd")
   , o_O = monocle.o_O
   , o_C = monocle.callback
   , _ = require("underscore")
+  , spin = require("./spin.js")
   , appdesc = {
       'app': path.resolve(__dirname, "com.wunderkinder.wunderlistandroid-1.apk")
     , 'appPkg': 'com.wunderkinder.wunderlistandroid'
@@ -21,11 +22,10 @@ var wd = require("yiewd")
   };
 
 (function() {
-  var account = ['sebastian@saucelabs.com', 'test123'];
+  var account = [process.env.WUNDERLIST_EMAIL, process.env.WUNDERLIST_PASSWORD];
   var login = o_O(function*(driver) {
     var button = yield driver.elementByName('Log In');
     yield button.click();
-    yield driver.sleep(3);
 
     var inputs = yield driver.elementsByTagName('EditText');
     for (var i in inputs) {
@@ -64,6 +64,7 @@ var wd = require("yiewd")
     yield adds[0].click();
     yield adds[0].click();
     yield adds[0].sendKeys(label + '\n');
+    yield driver.sleep(2);
   });
 
   var sync = o_O(function*(driver) {
@@ -91,11 +92,10 @@ var wd = require("yiewd")
 
     var pairs = yield readPairs();
     yield driver.init(caps);
-    yield login(driver);
-    yield driver.sleep(4);
-    yield dismiss(driver);
+    yield spin(login, driver);
+    yield spin(dismiss, driver);
     yield addItem(driver, pairs);
-    yield sync(driver);
+    yield spin(sync, driver);
     yield driver.quit();
   });
 })();

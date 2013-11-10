@@ -7,6 +7,7 @@ var wd = require("yiewd")
   , monocle = require("monocle-js")
   , o_O = monocle.o_O
   , o_C = monocle.callback
+  , spin = require("./spin.js")
   , _ = require("underscore")
   , appdesc = {
       'app': path.resolve(__dirname, "org.leo.android.dict-1.apk")
@@ -104,10 +105,14 @@ var wd = require("yiewd")
     var term = yield readTerm();
     yield lookup[0].sendKeys(term + "\n");
 
-    // make this a spinner
-    yield driver.sleep(4);
+    var entries = [];
+    yield spin(o_O(function*() {
+      entries = yield driver.elementsByTagName("TextView");
+      if (entries.length === 0) {
+        throw { message: "no entries" };
+      }
+    }));
 
-    var entries = yield driver.elementsByTagName("TextView");
     var raw = yield processEntries(entries);
 
     process.stdout.write(raw);
