@@ -74,6 +74,7 @@ var wd = require("yiewd")
         raw = raw.replace(/\s{2,}/g, ' ');
         raw = raw.replace(/[\t]/g, ' ');
         raw = raw.replace(/[\']/g, '');
+        raw = raw.replace(/[®]/g, '');
         raw = raw.replace(/[\|]/g, '-');
         raw = raw.replace(/[\&]/g, '');
         raw = raw.replace(/[ä]/gi, 'ae');
